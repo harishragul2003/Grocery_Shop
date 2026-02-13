@@ -20,6 +20,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Lazy Loaded Admin Pages
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -69,6 +70,9 @@ function App() {
                         <Route path="/admin/products" element={<ManageProducts />} />
                         <Route path="/admin/orders" element={<AdminOrders />} />
                       </Route>
+
+                      {/* 404 Catch-all Route */}
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </main>
