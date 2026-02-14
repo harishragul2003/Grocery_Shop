@@ -1,29 +1,49 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
+
+const pool = new Pool({
+    connectionString: process.env.POSTGRES_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
 const connectDB = async () => {
-    if (!process.env.MONGO_URL) {
-        console.error('Error: MONGO_URL is not defined in .env file');
-        process.exit(1);
+    // Try to connect to PostgreSQL, but don't fail if it doesn't work
+    // The app will use Supabase instead
+    if (!process.env.POSTGRES_URL) {
+        console.log('⚠️  PostgreSQL not configured, using Supabase instead');
+        return;
     }
 
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URL);
+        const client = await pool.connect();
+        console.log(`✅ PostgreSQL Connected`);
 
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        client.release();
 
-        // Handle connection errors after initial connection
-        mongoose.connection.on('error', (err) => {
-            console.error(`❌ MongoDB connection error: ${err}`);
-        });
-
-        mongoose.connection.on('disconnected', () => {
-            console.warn('⚠️ MongoDB disconnected');
+        // Handle connection errors
+        pool.on('error', (err) => {
+            console.error(`❌ PostgreSQL connection error: ${err.message}`);
         });
 
     } catch (error) {
-        console.error(`❌ Error connecting to MongoDB: ${error.message}`);
-        process.exit(1);
+        console.log('⚠️  PostgreSQL connection failed, using Supabase instead');
+        console.log('Error:', error.message);
     }
 };
 
-module.exports = connectDB;
+// Query helper function
+const query = async (text, params) => {
+    const start = Date.now();
+    try {
+        const res = await pool.query(text, params);
+        const duration = Date.now() - start;
+        console.log('Executed query', { text, duration, rows: res.rowCount });
+        return res;
+    } catch (error) {
+        console.error('Error executing query', { text, params, error });
+        throw error;
+    }
+};
+
+module.exports = { connectDB, query };

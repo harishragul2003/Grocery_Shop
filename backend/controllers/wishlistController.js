@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const Wishlist = require('../models/Wishlist');
 
 // @desc    Add or Remove product from wishlist (Toggle)
 // @route   POST /api/wishlist/:productId
@@ -8,24 +8,19 @@ exports.toggleWishlist = async (req, res) => {
         const userId = req.user.id;
         const productId = req.params.productId;
 
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ success: false, error: 'User not found' });
-        }
-
-        const isWishlisted = user.wishlist.includes(productId);
+        const wishlist = await Wishlist.getByUser(userId);
+        const isWishlisted = wishlist.items.includes(productId);
 
         if (isWishlisted) {
             // Remove from wishlist
-            user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
-            await user.save();
-            return res.status(200).json({ success: true, message: 'Removed from wishlist', data: user.wishlist });
+            wishlist.items = wishlist.items.filter(id => id !== productId);
+            const updatedWishlist = await Wishlist.upsert(userId, wishlist.items);
+            return res.status(200).json({ success: true, message: 'Removed from wishlist', data: updatedWishlist });
         } else {
             // Add to wishlist
-            user.wishlist.push(productId);
-            await user.save();
-            return res.status(200).json({ success: true, message: 'Added to wishlist', data: user.wishlist });
+            wishlist.items.push(productId);
+            const updatedWishlist = await Wishlist.upsert(userId, wishlist.items);
+            return res.status(200).json({ success: true, message: 'Added to wishlist', data: updatedWishlist });
         }
     } catch (err) {
         res.status(500).json({ success: false, error: 'Server Error' });
@@ -37,8 +32,8 @@ exports.toggleWishlist = async (req, res) => {
 // @access  Private
 exports.getWishlist = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).populate('wishlist');
-        res.status(200).json({ success: true, count: user.wishlist.length, data: user.wishlist });
+        const wishlist = await Wishlist.getByUser(req.user.id);
+        res.status(200).json({ success: true, count: wishlist.items.length, data: wishlist });
     } catch (err) {
         res.status(500).json({ success: false, error: 'Server Error' });
     }

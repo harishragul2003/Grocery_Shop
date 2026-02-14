@@ -70,7 +70,7 @@ const WhyChooseUs = () => {
       <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-blue-500/8 to-cyan-500/8 rounded-full blur-2xl animate-pulse delay-1000"></div>
       <div className="absolute top-1/2 right-20 w-24 h-24 bg-gradient-to-r from-purple-500/8 to-indigo-500/8 rounded-full blur-2xl animate-pulse delay-500"></div>
       
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 relative z-10">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -12,6 +12,7 @@
     "clean": "rm -rf dist node_modules/.vite"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "axios": "^1.13.5",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.563.0",

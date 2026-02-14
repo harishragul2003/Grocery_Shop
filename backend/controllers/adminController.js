@@ -7,20 +7,29 @@ const Product = require('../models/Product');
 // @access  Private/Admin
 exports.getStats = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments({ role: 'user' });
-        const totalOrders = await Order.countDocuments();
-        const products = await Product.countDocuments();
+        // Get all users
+        const users = await User.getAll();
+        const totalUsers = users.filter(u => u.role === 'user').length;
 
-        const orders = await Order.find({ paymentStatus: 'Completed' });
-        const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+        // Get all orders
+        const orders = await Order.getAll();
+        const totalOrders = orders.length;
+
+        // Get all products
+        const products = await Product.getAll();
+        const totalProducts = products.length;
+
+        // Calculate total revenue from completed orders
+        const completedOrders = orders.filter(o => o.paymentStatus === 'Completed');
+        const totalRevenue = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
 
         // Weekly revenue data for chart
         const last7Days = new Date();
         last7Days.setDate(last7Days.getDate() - 7);
 
-        const recentOrders = await Order.find({
-            createdAt: { $gte: last7Days },
-            paymentStatus: 'Completed'
+        const recentOrders = completedOrders.filter(o => {
+            const orderDate = new Date(o.createdAt);
+            return orderDate >= last7Days;
         });
 
         // Group by day
@@ -33,7 +42,7 @@ exports.getStats = async (req, res) => {
         }
 
         recentOrders.forEach(order => {
-            const dateStr = order.createdAt.toISOString().split('T')[0];
+            const dateStr = new Date(order.createdAt).toISOString().split('T')[0];
             if (dailyRevenue[dateStr] !== undefined) {
                 dailyRevenue[dateStr] += order.totalAmount;
             }
@@ -49,12 +58,13 @@ exports.getStats = async (req, res) => {
             data: {
                 totalUsers,
                 totalOrders,
-                totalProducts: products,
+                totalProducts,
                 totalRevenue: totalRevenue.toFixed(2),
                 chartData
             }
         });
     } catch (err) {
+        console.error('Error fetching stats:', err);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };

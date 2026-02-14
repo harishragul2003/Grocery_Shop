@@ -1,42 +1,107 @@
-const mongoose = require('mongoose');
+const { supabase } = require('../config/supabaseClient');
 
-const productSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Please add a product name'],
-        trim: true
+const Product = {
+    // Query helper
+    query: async (text, params) => {
+        // For Supabase, we use the client directly
+        // This is a placeholder for compatibility
+        return { rows: [] };
     },
-    price: {
-        type: Number,
-        required: [true, 'Please add a price']
+
+    // Create a new product
+    create: async (data) => {
+        const { name, price, category, image_url, stock, description, brand, ratings, num_reviews, original_price } = data;
+        const { data: result, error } = await supabase
+            .from('products')
+            .insert([{
+                name, price, category, image_url, stock,
+                description, brand, ratings: ratings || 0,
+                num_reviews: num_reviews || 0, original_price
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
     },
-    image: {
-        type: String,
-        default: 'no-image.jpg'
+
+    // Get all products
+    getAll: async () => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
     },
-    category: {
-        type: String,
-        required: [true, 'Please select a category']
+
+    // Get product by ID
+    getById: async (id) => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
     },
-    stock: {
-        type: Number,
-        required: [true, 'Please add stock quantity'],
-        default: 0
+
+    // Get products by category
+    getByCategory: async (category) => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', category)
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
     },
-    description: {
-        type: String,
-        required: [true, 'Please add a description']
+
+    // Search products
+    search: async (searchTerm) => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .ilike('name', `%${searchTerm}%`)
+            .or(`category.ilike.%${searchTerm}%`)
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
     },
-    ratings: {
-        type: Number,
-        default: 0
+
+    // Update product
+    update: async (id, data) => {
+        const { name, price, category, image_url, stock, description, brand, ratings, num_reviews, original_price } = data;
+        const { data: result, error } = await supabase
+            .from('products')
+            .update({
+                name, price, category, image_url, stock,
+                description, brand, ratings, num_reviews, original_price
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
     },
-    numReviews: {
-        type: Number,
-        default: 0
+
+    // Delete product
+    delete: async (id) => {
+        const { data: result, error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
     }
-}, {
-    timestamps: true
-});
+};
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = Product;

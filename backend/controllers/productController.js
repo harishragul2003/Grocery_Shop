@@ -5,53 +5,55 @@ const Product = require('../models/Product');
 // @access  Public
 exports.getProducts = async (req, res) => {
     try {
-        const { keyword, category, minPrice, maxPrice } = req.query;
+        const { keyword, category, minPrice, maxPrice, page = 1, limit = 8 } = req.query;
 
-        // Build query object
-        let query = {};
+        // Fetch all products from Supabase
+        let products = await Product.getAll();
 
-        // Search by keyword in name or description
+        // Filter by keyword
         if (keyword) {
-            query.$or = [
-                { name: { $regex: keyword, $options: 'i' } },
-                { description: { $regex: keyword, $options: 'i' } }
-            ];
+            products = products.filter(p => 
+                p.name.toLowerCase().includes(keyword.toLowerCase()) ||
+                p.description?.toLowerCase().includes(keyword.toLowerCase())
+            );
         }
 
         // Filter by category
         if (category && category !== 'All') {
-            query.category = category;
+            products = products.filter(p => p.category === category);
         }
 
         // Filter by price range
         if (minPrice || maxPrice) {
-            query.price = {};
-            if (minPrice) query.price.$gte = Number(minPrice);
-            if (maxPrice) query.price.$lte = Number(maxPrice);
+            products = products.filter(p => {
+                if (minPrice && p.price < Number(minPrice)) return false;
+                if (maxPrice && p.price > Number(maxPrice)) return false;
+                return true;
+            });
         }
 
-        // Pagination setup
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 8;
-        const skip = (page - 1) * limit;
-        const total = await Product.countDocuments(query);
+        // Get total count
+        const total = products.length;
 
-        const products = await Product.find(query)
-            .skip(skip)
-            .limit(limit);
+        // Pagination
+        const pageNum = parseInt(page, 10);
+        const limitNum = parseInt(limit, 10);
+        const offset = (pageNum - 1) * limitNum;
+        const paginatedProducts = products.slice(offset, offset + limitNum);
 
         res.status(200).json({
             success: true,
-            count: products.length,
+            count: paginatedProducts.length,
             pagination: {
                 total,
-                pages: Math.ceil(total / limit),
-                currentPage: page,
-                limit
+                pages: Math.ceil(total / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
             },
-            data: products
+            data: paginatedProducts
         });
     } catch (err) {
+        console.error('Error fetching products:', err);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
@@ -61,7 +63,7 @@ exports.getProducts = async (req, res) => {
 // @access  Public
 exports.getProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.getById(req.params.id);
         if (!product) {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
@@ -88,16 +90,10 @@ exports.createProduct = async (req, res) => {
 // @access  Private/Admin
 exports.updateProduct = async (req, res) => {
     try {
-        let product = await Product.findById(req.params.id);
+        const product = await Product.update(req.params.id, req.body);
         if (!product) {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
-
-        product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-
         res.status(200).json({ success: true, data: product });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
@@ -109,13 +105,10 @@ exports.updateProduct = async (req, res) => {
 // @access  Private/Admin
 exports.deleteProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.delete(req.params.id);
         if (!product) {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
-
-        await product.deleteOne();
-
         res.status(200).json({ success: true, data: {} });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });

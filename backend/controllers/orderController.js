@@ -5,22 +5,23 @@ const Order = require('../models/Order');
 // @access  Private
 exports.createOrder = async (req, res) => {
     try {
-        const { products, totalAmount, shippingAddress } = req.body;
+        const { products, totalAmount, shippingAddress, paymentStatus = 'Pending', orderStatus = 'Processing', paymentId } = req.body;
 
         if (products && products.length === 0) {
             return res.status(400).json({ success: false, error: 'No order items' });
         }
 
-        const order = new Order({
+        const order = await Order.create({
             userId: req.user.id,
             products,
             totalAmount,
-            shippingAddress
+            shippingAddress,
+            paymentStatus,
+            orderStatus,
+            paymentId
         });
 
-        const createdOrder = await order.save();
-
-        res.status(201).json({ success: true, data: createdOrder });
+        res.status(201).json({ success: true, data: order });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -31,7 +32,7 @@ exports.createOrder = async (req, res) => {
 // @access  Private
 exports.getMyOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.user.id }).sort('-createdAt');
+        const orders = await Order.getByUser(req.user.id);
         res.status(200).json({ success: true, data: orders });
     } catch (err) {
         res.status(500).json({ success: false, error: 'Server Error' });
@@ -43,7 +44,7 @@ exports.getMyOrders = async (req, res) => {
 // @access  Private/Admin
 exports.getOrders = async (req, res) => {
     try {
-        const orders = await Order.find().populate('userId', 'name email').sort('-createdAt');
+        const orders = await Order.getAll();
         res.status(200).json({ success: true, count: orders.length, data: orders });
     } catch (err) {
         res.status(500).json({ success: false, error: 'Server Error' });
@@ -55,14 +56,13 @@ exports.getOrders = async (req, res) => {
 // @access  Private/Admin
 exports.updateOrderStatus = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.update(req.params.id, {
+            orderStatus: req.body.orderStatus
+        });
 
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found' });
         }
-
-        order.orderStatus = req.body.orderStatus;
-        await order.save();
 
         res.status(200).json({ success: true, data: order });
     } catch (err) {
@@ -75,13 +75,11 @@ exports.updateOrderStatus = async (req, res) => {
 // @access  Private/Admin
 exports.deleteOrder = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.delete(req.params.id);
 
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found' });
         }
-
-        await order.deleteOne();
 
         res.status(200).json({ success: true, data: {} });
     } catch (err) {

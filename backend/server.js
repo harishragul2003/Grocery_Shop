@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 
-// Load environment variables
+// Load environment variables FIRST
 dotenv.config();
+
+const { supabase } = require('./config/supabaseClient');
+const { connectDB } = require('./config/db');
 
 // Connect to Database
 connectDB();
@@ -14,7 +16,7 @@ const app = express();
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const xss = require('xss-clean');
+// const xss = require('xss-clean'); // Temporarily disabled
 const hpp = require('hpp');
 
 // Middleware
@@ -23,8 +25,8 @@ app.use(express.json());
 // Set security headers
 app.use(helmet());
 
-// Prevent XSS attacks
-app.use(xss());
+// Prevent XSS attacks - temporarily disabled
+// app.use(xss());
 
 // Rate limiting
 const limiter = rateLimit({

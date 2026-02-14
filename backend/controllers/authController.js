@@ -33,14 +33,14 @@ exports.login = async (req, res, next) => {
         }
 
         // Check for user
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.getByEmail(email);
 
         if (!user) {
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
         // Check if password matches
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await User.verifyPassword(password, user.password);
 
         if (!isMatch) {
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -55,13 +55,13 @@ exports.login = async (req, res, next) => {
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
     // Create token
-    const token = user.getSignedJwtToken();
+    const token = User.generateToken(user.id);
 
     res.status(statusCode).json({
         success: true,
         token,
         data: {
-            id: user._id,
+            id: user.id,
             name: user.name,
             email: user.email,
             role: user.role
@@ -74,7 +74,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Private
 exports.getMe = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.getById(req.user.id);
         res.status(200).json({
             success: true,
             data: user

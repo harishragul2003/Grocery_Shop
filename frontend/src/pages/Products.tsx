@@ -6,7 +6,22 @@ import ProductGrid from '../components/ProductGrid';
 import FilterSidebar from '../components/FilterSidebar';
 import EmptyState from '../components/EmptyState';
 import { ProductSkeletonGrid } from '../components/ProductSkeleton';
-import { mockProducts, categories, brands } from '../data/products';
+import { supabase } from '../lib/supabaseClient';
+import { categories, brands } from '../data/products';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image_url: string;
+  stock: number;
+  description?: string;
+  brand?: string;
+  ratings?: number;
+  num_reviews?: number;
+  original_price?: number;
+}
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,11 +34,33 @@ const Products = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [products, setProducts] = useState<Product[]>([]);
   const itemsPerPage = 8;
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } else {
+        setProducts(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
 
   // Filter and sort products
   const getFilteredProducts = () => {
-    let filtered = mockProducts;
+    let filtered = products;
 
     // Filter by search query
     if (searchQuery.trim()) {

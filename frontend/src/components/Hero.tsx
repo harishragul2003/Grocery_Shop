@@ -4,7 +4,7 @@ const Hero = () => {
   return (
     <section className="py-16 relative">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="text-center">
+        <div className="text-center px-4">
           <motion.h1 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -17,7 +17,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg sm:text-xl text-slate-400 mb-8 max-w-2xl mx-auto px-4"
+            className="text-lg sm:text-xl text-slate-400 mb-8 max-w-2xl mx-auto"
           >
             Get fresh produce, dairy, and essentials delivered to your door in minutes
           </motion.p>

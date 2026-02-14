@@ -5,12 +5,7 @@ const Cart = require('../models/Cart');
 // @access  Private
 exports.getCart = async (req, res) => {
     try {
-        let cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId');
-
-        if (!cart) {
-            return res.status(200).json({ success: true, data: { items: [] } });
-        }
-
+        const cart = await Cart.getByUser(req.user.id);
         res.status(200).json({ success: true, data: cart });
     } catch (err) {
         res.status(500).json({ success: false, error: 'Server Error' });
@@ -22,35 +17,23 @@ exports.getCart = async (req, res) => {
 // @access  Private
 exports.addToCart = async (req, res) => {
     try {
-        const { productId, qty, override } = req.body;
+        const { productId, qty = 1, override } = req.body;
 
-        let cart = await Cart.findOne({ userId: req.user.id });
+        const cart = await Cart.getByUser(req.user.id);
+        const existingItem = cart.items.find(item => item.product_id === productId);
 
-        if (cart) {
-            // Check if product already in cart
-            const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-
-            if (itemIndex > -1) {
-                // Update quantity
-                if (override) {
-                    cart.items[itemIndex].qty = qty;
-                } else {
-                    cart.items[itemIndex].qty += qty;
-                }
+        if (existingItem) {
+            if (override) {
+                existingItem.qty = qty;
             } else {
-                // Add new item
-                cart.items.push({ productId, qty });
+                existingItem.qty += qty;
             }
-            await cart.save();
         } else {
-            // Create new cart
-            cart = await Cart.create({
-                userId: req.user.id,
-                items: [{ productId, qty }]
-            });
+            cart.items.push({ product_id: productId, qty });
         }
 
-        res.status(200).json({ success: true, data: cart });
+        const updatedCart = await Cart.upsert(req.user.id, cart.items);
+        res.status(200).json({ success: true, data: updatedCart });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -61,17 +44,11 @@ exports.addToCart = async (req, res) => {
 // @access  Private
 exports.removeFromCart = async (req, res) => {
     try {
-        let cart = await Cart.findOne({ userId: req.user.id });
+        const cart = await Cart.getByUser(req.user.id);
+        cart.items = cart.items.filter(item => item.product_id !== req.params.itemId);
 
-        if (!cart) {
-            return res.status(404).json({ success: false, error: 'Cart not found' });
-        }
-
-        cart.items = cart.items.filter(item => item._id.toString() !== req.params.itemId);
-
-        await cart.save();
-
-        res.status(200).json({ success: true, data: cart });
+        const updatedCart = await Cart.upsert(req.user.id, cart.items);
+        res.status(200).json({ success: true, data: updatedCart });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

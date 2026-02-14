@@ -2,7 +2,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { ProductSkeletonGrid } from './ProductSkeleton';
-import { mockProducts } from '../data/products';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image_url: string;
+  stock: number;
+  description?: string;
+  brand?: string;
+  ratings?: number;
+  num_reviews?: number;
+  original_price?: number;
+}
 
 const ProductGrid = ({ 
   products = [], 
@@ -15,7 +28,7 @@ const ProductGrid = ({
   itemsPerPage = 8
 }) => {
   // Use imported products data if none provided
-  const displayProducts = products.length > 0 ? products : mockProducts.slice(0, 8);
+  const displayProducts = products.length > 0 ? products : [];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -190,7 +203,7 @@ const ProductGrid = ({
             >
               {displayProducts.map((product, index) => (
                 <motion.div
-                  key={product._id}
+                  key={product.id}
                   variants={itemVariants}
                   layout
                 >

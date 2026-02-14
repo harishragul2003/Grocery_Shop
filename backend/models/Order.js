@@ -1,56 +1,97 @@
-const mongoose = require('mongoose');
+const { supabase } = require('../config/supabaseClient');
 
-const orderSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+const Order = {
+    // Query helper
+    query: async (text, params) => {
+        return { rows: [] };
     },
-    products: [
-        {
-            productId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true
-            },
-            name: String,
-            qty: {
-                type: Number,
-                required: true
-            },
-            price: {
-                type: Number,
-                required: true
-            }
-        }
-    ],
-    totalAmount: {
-        type: Number,
-        required: true,
-        default: 0.0
+
+    // Create a new order
+    create: async (data) => {
+        const { userId, products, totalAmount, paymentStatus, orderStatus, shippingAddress, paymentId } = data;
+        const { data: result, error } = await supabase
+            .from('orders')
+            .insert([{
+                user_id: userId,
+                products,
+                total_amount: totalAmount,
+                payment_status: paymentStatus,
+                order_status: orderStatus,
+                shipping_address: shippingAddress,
+                payment_id: paymentId
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
     },
-    paymentStatus: {
-        type: String,
-        required: true,
-        enum: ['Pending', 'Completed', 'Failed'],
-        default: 'Pending'
+
+    // Get all orders
+    getAll: async () => {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
     },
-    orderStatus: {
-        type: String,
-        required: true,
-        enum: ['Processing', 'Shipped', 'Delivered', 'Cancelled'],
-        default: 'Processing'
+
+    // Get order by ID
+    getById: async (id) => {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
     },
-    shippingAddress: {
-        type: String,
-        required: true
+
+    // Get orders by user
+    getByUser: async (userId) => {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
     },
-    paymentId: {
-        type: String,
-        unique: true
+
+    // Update order
+    update: async (id, data) => {
+        const { paymentStatus, orderStatus, shippingAddress } = data;
+        const { data: result, error } = await supabase
+            .from('orders')
+            .update({
+                payment_status: paymentStatus,
+                order_status: orderStatus,
+                shipping_address: shippingAddress
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
+    },
+
+    // Delete order
+    delete: async (id) => {
+        const { data: result, error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
     }
-}, {
-    timestamps: true
-});
+};
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = Order;

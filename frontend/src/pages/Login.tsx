@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, Loader2, LogIn, AlertCircle } from 'lucide-react';
-import QuickLogin from '../components/QuickLogin';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -74,10 +73,13 @@ const Login = () => {
                     token: `demo-token-${user.id}-${Date.now()}`
                 };
                 
+                // Clear form fields before navigation
+                setFormData({ email: '', password: '' });
+                
                 login(authData);
                 navigate('/');
             } else {
-                setError('Invalid email or password. Try john@example.com / password123 or admin@example.com / admin123');
+                setError('Invalid email or password');
             }
         } catch (err) {
             setError('Login failed. Please try again.');
@@ -186,21 +188,6 @@ const Login = () => {
                             Create Account
                         </Link>
                     </p>
-
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-                        <h4 className="text-sm font-semibold text-slate-300 mb-2">Demo Credentials:</h4>
-                        <div className="text-xs text-slate-400 space-y-1">
-                            <div>User: <span className="text-emerald-400">john@example.com</span> / <span className="text-emerald-400">password123</span></div>
-                            <div>Admin: <span className="text-emerald-400">admin@example.com</span> / <span className="text-emerald-400">admin123</span></div>
-                        </div>
-                    </div>
-
-                    {/* Quick Login Buttons */}
-                    <QuickLogin onLogin={(authData) => {
-                        login(authData);
-                        navigate('/');
-                    }} />
                 </div>
             </div>
         </div>

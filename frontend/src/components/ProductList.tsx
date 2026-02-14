@@ -3,24 +3,44 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, TrendingUp, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
-import { mockProducts } from '../data/products';
+import { supabase } from '../lib/supabaseClient';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image_url: string;
+  stock: number;
+  description?: string;
+  brand?: string;
+  ratings?: number;
+  num_reviews?: number;
+  original_price?: number;
+}
 
 const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 8 }) => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Simulate API call
     const fetchProducts = async () => {
       setLoading(true);
-      // In real app, replace with actual API call
-      setTimeout(() => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } else {
         // Get a random selection of products for variety
-        const shuffled = [...mockProducts].sort(() => 0.5 - Math.random());
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
         setProducts(shuffled.slice(0, limit));
-        setLoading(false);
-      }, 1000);
+      }
+      setLoading(false);
     };
 
     fetchProducts();
@@ -101,13 +121,13 @@ const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 8 }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
           {products.map((product, index) => (
             <motion.div
-              key={product._id}
+              key={product.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <ProductCard product={product} showQuickView={showQuickView} />
+              <ProductCard product={product} />
             </motion.div>
           ))}
         </div>
