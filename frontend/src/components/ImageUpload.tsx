@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import api from '../services/api';
 
-const ImageUpload = ({ onUploadSuccess, currentImage }) => {
-    const [uploading, setUploading] = useState(false);
-    const [preview, setPreview] = useState(currentImage || null);
-    const [error, setError] = useState(null);
+interface ImageUploadProps {
+    onUploadSuccess: (url: string) => void;
+    currentImage: string | null;
+}
 
-    const handleFileChange = async (e) => {
-        const file = e.target.files[0];
+const ImageUpload = ({ onUploadSuccess, currentImage }: ImageUploadProps) => {
+    const [uploading, setUploading] = useState(false);
+    const [preview, setPreview] = useState<string | null>(currentImage);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (!file) return;
 
         // Type validation
@@ -37,12 +42,18 @@ const ImageUpload = ({ onUploadSuccess, currentImage }) => {
                 },
             });
 
-            const imageUrl = `http://localhost:5000${data.data}`;
+            // Backend returns path like /uploads/image-name.jpg
+            // The uploads folder is served at http://localhost:5000/uploads
+            // So we need to remove /api prefix if present and use the correct base URL
+            const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            const imageUrl = data.data.startsWith('http') 
+                ? data.data 
+                : `${backendUrl}${data.data}`;
             setPreview(imageUrl);
             onUploadSuccess(imageUrl);
             setUploading(false);
-        } catch (err) {
-            setError(err.response?.data?.error || 'Failed to upload image');
+        } catch (err: any) {
+            setError(err.response?.data?.error || err.message || 'Failed to upload image');
             setUploading(false);
         }
     };

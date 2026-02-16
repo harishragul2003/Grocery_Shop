@@ -1,7 +1,22 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import Toast from '../components/Toast';
 
-const ToastContext = createContext();
+interface Toast {
+  id: number | string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  duration: number;
+}
+
+interface ToastContextType {
+  addToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info', duration?: number) => void;
+  showSuccess: (message: string, duration?: number) => void;
+  showError: (message: string, duration?: number) => void;
+  showWarning: (message: string, duration?: number) => void;
+  showInfo: (message: string, duration?: number) => void;
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const useToast = () => {
   const context = useContext(ToastContext);
@@ -11,10 +26,10 @@ export const useToast = () => {
   return context;
 };
 
-export const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState([]);
+export const ToastProvider = ({ children }: { children: ReactNode }) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = (message, type = 'success', duration = 3000) => {
+  const addToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success', duration: number = 3000) => {
     const id = Date.now() + Math.random();
     const toast = { id, message, type, duration };
     
@@ -26,14 +41,14 @@ export const ToastProvider = ({ children }) => {
     }, duration + 300); // Add 300ms for exit animation
   };
 
-  const removeToast = (id) => {
+  const removeToast = (id: number | string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
-  const showSuccess = (message, duration) => addToast(message, 'success', duration);
-  const showError = (message, duration) => addToast(message, 'error', duration);
-  const showWarning = (message, duration) => addToast(message, 'warning', duration);
-  const showInfo = (message, duration) => addToast(message, 'info', duration);
+  const showSuccess = (message: string, duration?: number) => addToast(message, 'success', duration);
+  const showError = (message: string, duration?: number) => addToast(message, 'error', duration);
+  const showWarning = (message: string, duration?: number) => addToast(message, 'warning', duration);
+  const showInfo = (message: string, duration?: number) => addToast(message, 'info', duration);
 
   return (
     <ToastContext.Provider value={{

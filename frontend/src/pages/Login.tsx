@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, Loader2, LogIn, AlertCircle } from 'lucide-react';
+import api from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ const Login = () => {
     const [error, setError] = useState('');
 
     const { login } = useAuth();
+    const { showSuccess, showError } = useToast();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -24,65 +27,24 @@ const Login = () => {
         setLoading(true);
 
         try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock authentication - in a real app, this would validate against a backend
             const { email, password } = formData;
-            
-            // Demo users for testing
-            const demoUsers = [
-                {
-                    id: '1',
-                    name: 'John Doe',
-                    email: 'john@example.com',
-                    password: 'password123',
-                    role: 'user'
-                },
-                {
-                    id: '2',
-                    name: 'Admin User',
-                    email: 'admin@example.com',
-                    password: 'admin123',
-                    role: 'admin'
-                },
-                {
-                    id: '3',
-                    name: 'Jane Smith',
-                    email: 'jane@example.com',
-                    password: 'password123',
-                    role: 'user'
-                }
-            ];
 
-            // Get registered users from localStorage
-            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-            
-            // Combine demo users with registered users
-            const allUsers = [...demoUsers, ...registeredUsers];
+            // Call backend API
+            const response = await api.post('/auth/login', {
+                email,
+                password
+            });
 
-            // Find user with matching credentials
-            const user = allUsers.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                // Create user object without password
-                const { password: _, ...userWithoutPassword } = user;
-                
-                const authData = {
-                    user: userWithoutPassword,
-                    token: `demo-token-${user.id}-${Date.now()}`
-                };
-                
-                // Clear form fields before navigation
-                setFormData({ email: '', password: '' });
-                
-                login(authData);
-                navigate('/');
-            } else {
-                setError('Invalid email or password');
-            }
-        } catch (err) {
-            setError('Login failed. Please try again.');
+            // Login with the returned token
+            login({
+                user: response.data.data,
+                token: response.data.token
+            });
+
+            showSuccess('Login successful!');
+            navigate('/');
+        } catch (err: any) {
+            setError(err.response?.data?.error || 'Invalid email or password');
         } finally {
             setLoading(false);
         }

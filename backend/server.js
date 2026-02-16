@@ -39,7 +39,10 @@ app.use('/api', limiter);
 app.use(hpp());
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+    origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://10.159.28.124:5173'],
+    credentials: true
+}));
 
 // Set static folder
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

@@ -284,7 +284,7 @@ const Footer = () => {
         <div className="py-6 border-t border-slate-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-6 text-sm text-slate-400">
-              <span>© 2024 NatureCart. All rights reserved.</span>
+              <span>© 2026 NatureCart. All rights reserved.</span>
               <div className="hidden md:flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Shield size={14} className="text-emerald-500" />
@@ -314,8 +314,7 @@ const Footer = () => {
 
         {/* Made with Love */}
         <div className="text-center py-4 border-t border-slate-800">
-          <p className="text-slate-500 text-sm flex items-center justify-center gap-2">
-            Made with <Heart size={14} className="text-red-500 animate-pulse" fill="currentColor" /> for fresh food lovers
+          <p className="text-slate-500 text-sm flex items-center justify-center gap-2">Developed by <span className="text-red-500 font-semibold">HARISH RAGUL</span> <Heart size={14} className="text-red-500 animate-pulse" fill="currentColor" />
           </p>
         </div>
       </div>

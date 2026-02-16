@@ -68,3 +68,35 @@ exports.getStats = async (req, res) => {
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
+
+// @desc    Update product rating
+// @route   PUT /api/admin/products/:id/rating
+// @access  Private/Admin
+exports.updateProductRating = async (req, res) => {
+    try {
+        const { rating, reviewCount } = req.body;
+
+        // Validate rating
+        if (rating === undefined || rating < 0 || rating > 5) {
+            return res.status(400).json({ success: false, error: 'Rating must be between 0 and 5' });
+        }
+
+        // Validate review count if provided
+        if (reviewCount !== undefined && reviewCount < 0) {
+            return res.status(400).json({ success: false, error: 'Review count cannot be negative' });
+        }
+
+        const product = await Product.update(req.params.id, {
+            ratings: rating,
+            num_reviews: reviewCount
+        });
+
+        if (!product) {
+            return res.status(404).json({ success: false, error: 'Product not found' });
+        }
+
+        res.status(200).json({ success: true, data: product });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+};

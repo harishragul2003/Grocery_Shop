@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/uploadMiddleware');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
+const path = require('path');
 
 // @desc    Upload image
 // @route   POST /api/upload
@@ -12,12 +13,16 @@ router.post('/', protect, isAdmin, upload.single('image'), (req, res) => {
     }
 
     // Return the path that will be stored in the Product model
-    // Note: On Windows, we replace backslashes with forward slashes for URL consistency
+    // On Windows, convert backslashes to forward slashes for URL consistency
     const filePath = req.file.path.replace(/\\/g, '/');
+    
+    // Extract just the filename from the full path
+    const fileName = path.basename(filePath);
+    const uploadPath = `uploads/${fileName}`;
 
     res.status(200).json({
         success: true,
-        data: `/${filePath}`
+        data: `/${uploadPath}`
     });
 });
 

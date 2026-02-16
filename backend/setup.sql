@@ -35,9 +35,9 @@ CREATE TRIGGER update_users_updated_at
 
 -- Insert demo users
 INSERT INTO users (name, email, password, role) VALUES
-('John Doe', 'john@example.com', '$2a$10$YourHashedPasswordHere', 'user'),
-('Admin User', 'admin@example.com', '$2a$10$YourHashedPasswordHere', 'admin'),
-('Jane Smith', 'jane@example.com', '$2a$10$YourHashedPasswordHere', 'user');
+('John Doe', 'john@example.com', '$2b$10$0/4bBp9vSZ1Q1OfdTuAd0..AWeivrLRgxIMzJ2Z9OLQDpQyY0ujQS', 'user'),
+('Admin User', 'admin@example.com', '$2b$10$tVmbi.6ZoKf7NxqaDco.WeezP6u4ieu5Z72UQPHwFH1A53T7sOFmO', 'admin'),
+('Jane Smith', 'jane@example.com', '$2b$10$0/4bBp9vSZ1Q1OfdTuAd0..AWeivrLRgxIMzJ2Z9OLQDpQyY0ujQS', 'user');
 
 -- Note: To generate a proper bcrypt hash, run this in Node.js:
 -- const bcrypt = require('bcryptjs');

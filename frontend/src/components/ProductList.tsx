@@ -19,7 +19,7 @@ interface Product {
   original_price?: number;
 }
 
-const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 8 }) => {
+const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 10 }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,15 +30,15 @@ const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 8 }
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('name', { ascending: true });
+        .order('ratings', { ascending: false })
+        .order('num_reviews', { ascending: false })
+        .limit(limit);
 
       if (error) {
         console.error('Error fetching products:', error);
         setProducts([]);
       } else {
-        // Get a random selection of products for variety
-        const shuffled = [...data].sort(() => 0.5 - Math.random());
-        setProducts(shuffled.slice(0, limit));
+        setProducts(data || []);
       }
       setLoading(false);
     };

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, Loader2, UserPlus, AlertCircle } from 'lucide-react';
+import api from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ const Register = () => {
     const [error, setError] = useState('');
 
     const { login } = useAuth();
+    const { showSuccess, showError } = useToast();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -25,47 +28,32 @@ const Register = () => {
         setLoading(true);
 
         try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             const { name, email, password } = formData;
 
             // Basic validation
             if (password.length < 6) {
                 setError('Password must be at least 6 characters long');
+                setLoading(false);
                 return;
             }
 
-            // Check if email already exists (mock check)
-            const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-            if (existingUsers.some(user => user.email === email)) {
-                setError('An account with this email already exists');
-                return;
-            }
-
-            // Create new user
-            const newUser = {
-                id: Date.now().toString(),
+            // Call backend API
+            const response = await api.post('/auth/register', {
                 name,
                 email,
-                role: 'user',
-                createdAt: new Date().toISOString()
-            };
+                password
+            });
 
-            // Save to registered users list
-            existingUsers.push({ ...newUser, password }); // Store password for demo login
-            localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+            // Login with the returned token
+            login({
+                user: response.data.data,
+                token: response.data.token
+            });
 
-            // Create auth data
-            const authData = {
-                user: newUser,
-                token: `demo-token-${newUser.id}-${Date.now()}`
-            };
-
-            login(authData);
+            showSuccess('Registration successful!');
             navigate('/');
-        } catch (err) {
-            setError('Registration failed. Please try again.');
+        } catch (err: any) {
+            setError(err.response?.data?.error || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -44,7 +44,13 @@ const User = {
             .eq('email', email)
             .single();
 
-        if (error && error.code !== 'PGRST116') throw error;
+        if (error) {
+            // PGRST116 is "no rows returned" error
+            if (error.code === 'PGRST116') {
+                return null;
+            }
+            throw error;
+        }
         return data;
     },
 

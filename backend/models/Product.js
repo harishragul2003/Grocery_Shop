@@ -22,7 +22,14 @@ const Product = {
             .single();
 
         if (error) throw error;
-        return result;
+        
+        // Transform field names for frontend compatibility
+        return {
+            ...result,
+            numReviews: result.num_reviews || 0,
+            originalPrice: result.original_price || null,
+            image: result.image_url || result.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        };
     },
 
     // Get all products
@@ -33,7 +40,14 @@ const Product = {
             .order('name', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        
+        // Transform field names for frontend compatibility
+        return (data || []).map(p => ({
+            ...p,
+            numReviews: p.num_reviews || 0,
+            originalPrice: p.original_price || null,
+            image: p.image_url || p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        }));
     },
 
     // Get product by ID
@@ -45,7 +59,14 @@ const Product = {
             .single();
 
         if (error) throw error;
-        return data;
+        
+        // Transform field names for frontend compatibility
+        return {
+            ...data,
+            numReviews: data.num_reviews || 0,
+            originalPrice: data.original_price || null,
+            image: data.image_url || data.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        };
     },
 
     // Get products by category
@@ -57,7 +78,14 @@ const Product = {
             .order('name', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        
+        // Transform field names for frontend compatibility
+        return (data || []).map(p => ({
+            ...p,
+            numReviews: p.num_reviews || 0,
+            originalPrice: p.original_price || null,
+            image: p.image_url || p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        }));
     },
 
     // Search products
@@ -70,7 +98,14 @@ const Product = {
             .order('name', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        
+        // Transform field names for frontend compatibility
+        return (data || []).map(p => ({
+            ...p,
+            numReviews: p.num_reviews || 0,
+            originalPrice: p.original_price || null,
+            image: p.image_url || p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        }));
     },
 
     // Update product
@@ -87,7 +122,14 @@ const Product = {
             .single();
 
         if (error) throw error;
-        return result;
+        
+        // Transform field names for frontend compatibility
+        return {
+            ...result,
+            numReviews: result.num_reviews || 0,
+            originalPrice: result.original_price || null,
+            image: result.image_url || result.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        };
     },
 
     // Delete product
@@ -100,7 +142,14 @@ const Product = {
             .single();
 
         if (error) throw error;
-        return result;
+        
+        // Transform field names for frontend compatibility
+        return {
+            ...result,
+            numReviews: result.num_reviews || 0,
+            originalPrice: result.original_price || null,
+            image: result.image_url || result.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'
+        };
     }
 };
 

@@ -1,7 +1,35 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 
-const CartContext = createContext();
+interface CartItem {
+  _id: string;
+  productId: {
+    _id: string;
+    name: string;
+    price: number;
+    image?: string;
+    category: string;
+    description?: string;
+    originalPrice?: number;
+    ratings?: number;
+    numReviews?: number;
+    inStock?: boolean;
+  };
+  qty: number;
+}
+
+interface CartContextType {
+  cart: CartItem[];
+  loading: boolean;
+  addToCart: (product: any, qty?: number) => Promise<{ success: boolean; error?: string }>;
+  removeFromCart: (itemId: string) => Promise<void>;
+  updateQty: (productId: string, qty: number) => Promise<void>;
+  getCartCount: () => number;
+  getCartTotal: () => string;
+  clearCart: () => void;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
@@ -170,4 +198,10 @@ export const CartProvider = ({ children }) => {
     );
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+};

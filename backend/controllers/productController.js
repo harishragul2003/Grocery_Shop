@@ -78,6 +78,33 @@ exports.getProduct = async (req, res) => {
 // @access  Private/Admin
 exports.createProduct = async (req, res) => {
     try {
+        const { name, price, original_price, category, stock, description, brand, image_url, ratings, num_reviews } = req.body;
+
+        // Stock validation
+        if (stock !== undefined && stock < 0) {
+            return res.status(400).json({ success: false, error: 'Stock quantity cannot be negative' });
+        }
+
+        // Price validation
+        if (price < 0) {
+            return res.status(400).json({ success: false, error: 'Price cannot be negative' });
+        }
+
+        // Original price validation (if provided)
+        if (original_price !== undefined && original_price < 0) {
+            return res.status(400).json({ success: false, error: 'Original price cannot be negative' });
+        }
+
+        // Rating validation (if provided)
+        if (ratings !== undefined && (ratings < 0 || ratings > 5)) {
+            return res.status(400).json({ success: false, error: 'Rating must be between 0 and 5' });
+        }
+
+        // Num reviews validation (if provided)
+        if (num_reviews !== undefined && num_reviews < 0) {
+            return res.status(400).json({ success: false, error: 'Number of reviews cannot be negative' });
+        }
+
         const product = await Product.create(req.body);
         res.status(201).json({ success: true, data: product });
     } catch (err) {
@@ -90,6 +117,33 @@ exports.createProduct = async (req, res) => {
 // @access  Private/Admin
 exports.updateProduct = async (req, res) => {
     try {
+        const { stock, ratings, num_reviews, price, original_price } = req.body;
+
+        // Stock validation
+        if (stock !== undefined && stock < 0) {
+            return res.status(400).json({ success: false, error: 'Stock quantity cannot be negative' });
+        }
+
+        // Price validation
+        if (price !== undefined && price < 0) {
+            return res.status(400).json({ success: false, error: 'Price cannot be negative' });
+        }
+
+        // Original price validation (if provided)
+        if (original_price !== undefined && original_price < 0) {
+            return res.status(400).json({ success: false, error: 'Original price cannot be negative' });
+        }
+
+        // Rating validation (if provided)
+        if (ratings !== undefined && (ratings < 0 || ratings > 5)) {
+            return res.status(400).json({ success: false, error: 'Rating must be between 0 and 5' });
+        }
+
+        // Num reviews validation (if provided)
+        if (num_reviews !== undefined && num_reviews < 0) {
+            return res.status(400).json({ success: false, error: 'Number of reviews cannot be negative' });
+        }
+
         const product = await Product.update(req.params.id, req.body);
         if (!product) {
             return res.status(404).json({ success: false, error: 'Product not found' });

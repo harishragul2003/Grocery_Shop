@@ -74,7 +74,7 @@ const CategoryCarousel = () => {
 
   return (
     <section className="py-4 sm:py-6 relative overflow-hidden w-full">
-      <div className="w-full px-3 sm:px-4 lg:px-6">
+      <div className="w-full px-3 sm:px-4 lg:px-6 max-w-full">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -91,17 +91,17 @@ const CategoryCarousel = () => {
           </p>
         </motion.div>
 
-        {/* Category Grid - No Scroll - Centered */}
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4">
+        {/* Category Carousel - Horizontal Scroll */}
+        <div className="flex overflow-x-auto gap-2 sm:gap-3 lg:gap-4 pb-4 pt-2 scrollbar-hide snap-x snap-mandatory w-full">
           {categoryData.map((category, index) => (
             <motion.div
               key={category.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -8 }}
-              className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px]"
+              className="snap-center shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
             >
               <Link
                 to={category.link}

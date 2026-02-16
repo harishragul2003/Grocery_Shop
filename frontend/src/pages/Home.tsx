@@ -22,12 +22,8 @@ interface Product {
 }
 
 const Home = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         const fetchProducts = async () => {
-            setLoading(true);
             const { data, error } = await supabase
                 .from('products')
                 .select('*')
@@ -35,11 +31,7 @@ const Home = () => {
 
             if (error) {
                 console.error('Error fetching products:', error);
-                setProducts([]);
-            } else {
-                setProducts(data || []);
             }
-            setLoading(false);
         };
 
         fetchProducts();
