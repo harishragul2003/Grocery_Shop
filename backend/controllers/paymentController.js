@@ -1,6 +1,15 @@
-const stripe = require('stripe')(process.env.PAYMENT_KEY);
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
+
+// Lazy Stripe initialization
+let stripe = null;
+
+const getStripe = () => {
+    if (!stripe && process.env.PAYMENT_KEY) {
+        stripe = require('stripe')(process.env.PAYMENT_KEY);
+    }
+    return stripe;
+};
 
 // @desc    Create Stripe Checkout Session
 // @route   POST /api/payment/create-checkout-session
@@ -11,6 +20,14 @@ exports.createCheckoutSession = async (req, res) => {
 
         if (!items || items.length === 0) {
             return res.status(400).json({ success: false, error: 'No items in order' });
+        }
+
+        const stripeInstance = getStripe();
+        if (!stripeInstance) {
+            return res.status(503).json({ 
+                success: false, 
+                error: 'Payment service is not configured. Please contact support.' 
+            });
         }
 
         const line_items = items.map(item => ({
@@ -26,7 +43,7 @@ exports.createCheckoutSession = async (req, res) => {
         }));
 
         // Create checkout session
-        const session = await stripe.checkout.sessions.create({
+        const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items,
             mode: 'payment',
@@ -52,7 +69,16 @@ exports.createCheckoutSession = async (req, res) => {
 exports.verifyPayment = async (req, res) => {
     try {
         const { sessionId } = req.body;
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        
+        const stripeInstance = getStripe();
+        if (!stripeInstance) {
+            return res.status(503).json({ 
+                success: false, 
+                error: 'Payment service is not configured. Please contact support.' 
+            });
+        }
+
+        const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
 
         if (session.payment_status === 'paid') {
             // Check if order already exists for this session to prevent duplicates
