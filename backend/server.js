@@ -47,11 +47,10 @@ app.use(cors({
     origin: function (origin, callback) {
         const allowedOrigins = [
             "http://localhost:5173",
-            "http://localhost:4173",
             "http://10.159.28.124:5173",
             "http://192.168.137.1:5174",
-            process.env.FRONTEND_URL,
-            process.env.CLIENT_URL
+            process.env.CLIENT_URL,
+            process.env.FRONTEND_URL
         ].filter(Boolean);
 
         if (!origin || allowedOrigins.includes(origin)) {
