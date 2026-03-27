@@ -80,9 +80,24 @@ const Order = {
         return result;
     },
 
+    // Update order status
+    updateStatus: async (id, status) => {
+        const { data: result, error } = await supabase
+            .from('orders')
+            .update({
+                order_status: status
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result;
+    },
+
     // Delete order
     delete: async (id) => {
-        const { data: result, error } = await supabase
+        const { data: result, error} = await supabase
             .from('orders')
             .delete()
             .eq('id', id)

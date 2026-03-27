@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -24,9 +24,10 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Lazy Loaded Admin Pages
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
 const ManageProducts = lazy(() => import('./pages/admin/ManageProducts'));
-const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'));
+const RevenueOverview = lazy(() => import('./pages/admin/RevenueOverview'));
+const ManageOrders = lazy(() => import('./pages/admin/ManageOrders'));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -34,6 +35,19 @@ const PageLoader = () => (
     <p className="text-slate-400 animate-pulse font-medium tracking-wide">Loading secure content...</p>
   </div>
 );
+
+// Layout wrapper to conditionally show Footer
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <>
+      {children}
+      {!isAdminRoute && <Footer />}
+    </>
+  );
+};
 
 function App() {
   return (
@@ -45,38 +59,40 @@ function App() {
               <div className="min-h-screen bg-slate-950 text-slate-50 font-sans w-full">
                 <Navbar />
                 <main className="pt-16 w-full">
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      {/* Public Routes */}
-                      <Route path="/" element={<Home />} />
-                      <Route path="/products" element={<Products />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
+                  <Layout>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        {/* Public Routes */}
+                        <Route path="/" element={<Home />} />
+                        <Route path="/products" element={<Products />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
 
-                      {/* Protected User Routes */}
-                      <Route element={<ProtectedRoute />}>
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/payment" element={<Payment />} />
-                        <Route path="/orders" element={<Orders />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/payment-success" element={<PaymentSuccess />} />
-                      </Route>
+                        {/* Protected User Routes */}
+                        <Route element={<ProtectedRoute />}>
+                          <Route path="/cart" element={<Cart />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/payment" element={<Payment />} />
+                          <Route path="/orders" element={<Orders />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/payment-success" element={<PaymentSuccess />} />
+                        </Route>
 
-                      {/* Protected Admin Routes */}
-                      <Route element={<ProtectedRoute adminOnly={true} />}>
-                        <Route path="/admin" element={<Dashboard />} />
-                        <Route path="/admin/add-product" element={<AddProduct />} />
-                        <Route path="/admin/products" element={<ManageProducts />} />
-                        <Route path="/admin/orders" element={<AdminOrders />} />
-                      </Route>
+                        {/* Protected Admin Routes */}
+                        <Route element={<ProtectedRoute adminOnly={true} />}>
+                          <Route path="/admin/dashboard" element={<Dashboard />} />
+                          <Route path="/admin/products" element={<ManageProducts />} />
+                          <Route path="/admin/users" element={<ManageUsers />} />
+                          <Route path="/admin/revenue" element={<RevenueOverview />} />
+                          <Route path="/admin/orders" element={<ManageOrders />} />
+                        </Route>
 
-                      {/* 404 Catch-all Route */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
+                        {/* 404 Catch-all Route */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </Layout>
                 </main>
-                <Footer />
               </div>
             </Router>
           </CartProvider>

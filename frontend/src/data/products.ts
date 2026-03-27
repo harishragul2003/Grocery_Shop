@@ -3542,7 +3542,7 @@ export const mockProducts = [
   },
 ];
 
-export const categories = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Bakery', 'Grains', 'Snacks', 'Pantry', 'Beverages', 'Frozen'];
+export const categories = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Bakery', 'Grains', 'Snacks', 'Pantry', 'Beverages', 'Frozen', 'Meat'];
 
 export const brands = [
   'Organic Farm', 'Fresh Valley', 'Pure Dairy', 'Artisan Bakery', 'Golden Harvest', 

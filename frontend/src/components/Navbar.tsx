@@ -76,9 +76,7 @@ const Navbar = () => {
   ];
 
   const adminLinks = user?.role === 'admin' ? [
-    { path: '/admin', label: 'Dashboard' },
-    { path: '/admin/products', label: 'Manage Products' },
-    { path: '/admin/orders', label: 'Orders' },
+    { path: '/admin/dashboard', label: 'Dashboard' }
   ] : [];
 
   return (
@@ -141,13 +139,13 @@ const Navbar = () => {
                     to={link.path}
                     className={`relative px-3 py-2 font-medium transition-all duration-200 ${
                       isActiveRoute(link.path)
-                        ? 'text-amber-400'
-                        : 'text-slate-300 hover:text-amber-400'
+                        ? 'text-emerald-400'
+                        : 'text-slate-300 hover:text-emerald-400'
                     }`}
                   >
                     {link.label}
                     {isActiveRoute(link.path) && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-full" />
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-full" />
                     )}
                   </Link>
                 ))}
@@ -326,15 +324,15 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              
+
               {adminLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 ${
                     isActiveRoute(link.path)
-                      ? 'text-amber-400 bg-amber-400/10'
-                      : 'text-slate-300 hover:text-amber-400 hover:bg-amber-400/5'
+                      ? 'text-emerald-400 bg-emerald-400/10'
+                      : 'text-slate-300 hover:text-emerald-400 hover:bg-emerald-400/5'
                   }`}
                 >
                   {link.label}

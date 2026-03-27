@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, TrendingUp, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
-import { supabase } from '../lib/supabaseClient';
+import api from '../services/api';
 
 interface Product {
   id: string;
@@ -27,18 +27,12 @@ const ProductList = ({ title = "Best Sellers", showQuickView = true, limit = 10 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('ratings', { ascending: false })
-        .order('num_reviews', { ascending: false })
-        .limit(limit);
-
-      if (error) {
+      try {
+        const res = await api.get(`/products?limit=${limit}&sort=ratings`);
+        setProducts(res.data.data || []);
+      } catch (error) {
         console.error('Error fetching products:', error);
         setProducts([]);
-      } else {
-        setProducts(data || []);
       }
       setLoading(false);
     };

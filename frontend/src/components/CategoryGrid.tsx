@@ -7,7 +7,7 @@ const CategoryGrid = () => {
   const categoryData = categories
     .filter(cat => cat !== 'All')
     .map((category, index) => {
-      const categoryMap = {
+      const categoryMap: Record<string, { emoji: string; description: string; gradient: string }> = {
         'Vegetables': {
           emoji: '🥕',
           description: 'Fresh farm vegetables',
@@ -52,6 +52,11 @@ const CategoryGrid = () => {
           emoji: '🧊',
           description: 'Frozen foods',
           gradient: 'from-cyan-500 to-blue-500'
+        },
+        'Meat': {
+          emoji: '🥩',
+          description: 'Fresh cuts & premium meat',
+          gradient: 'from-red-600 to-rose-600'
         }
       };
 
@@ -90,13 +95,22 @@ const CategoryGrid = () => {
           </p>
         </motion.div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
-          {categoryData.map((category, index) => (
+        {/* Categories Grid - 2 rows with 5 cards each */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {/* First row - 5 cards */}
+          {categoryData.slice(0, 5).map((category, index) => (
             <CategoryCard 
               key={category.id} 
               category={category} 
               index={index}
+            />
+          ))}
+          {/* Second row - 5 cards */}
+          {categoryData.slice(5).map((category, index) => (
+            <CategoryCard 
+              key={category.id} 
+              category={category} 
+              index={index + 5}
             />
           ))}
         </div>

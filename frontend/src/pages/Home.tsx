@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
-import CategoryCarousel from '../components/CategoryCarousel';
+import CategoryGrid from '../components/CategoryGrid';
 import ProductList from '../components/ProductList';
 import OffersSection from '../components/OffersSection';
 import WhyChooseUs from '../components/WhyChooseUs';
-import { supabase } from '../lib/supabaseClient';
+import api from '../services/api';
 
 interface Product {
   id: string;
@@ -24,16 +24,12 @@ interface Product {
 const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
-            const { data, error } = await supabase
-                .from('products')
-                .select('*')
-                .order('name', { ascending: true });
-
-            if (error) {
-                console.error('Error fetching products:', error);
+            try {
+                await api.get('/products?limit=10');
+            } catch (err) {
+                console.error('Error fetching products:', err);
             }
         };
-
         fetchProducts();
     }, []);
 
@@ -86,7 +82,7 @@ const Home = () => {
                     <Hero />
                 </motion.div>
 
-                {/* Categories Section */}
+                {/* Shop by Category Grid Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -94,7 +90,7 @@ const Home = () => {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="py-2 sm:py-4"
                 >
-                    <CategoryCarousel />
+                    <CategoryGrid />
                 </motion.div>
 
                 {/* Best Sellers Section */}

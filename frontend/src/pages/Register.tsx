@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, Loader2, UserPlus, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Loader2, UserPlus, AlertCircle, Phone } from 'lucide-react';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
 
@@ -9,7 +9,8 @@ const Register = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        phone: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -19,7 +20,17 @@ const Register = () => {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        
+        // Phone number validation - only allow digits and limit to 10
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '');
+            if (digitsOnly.length <= 10) {
+                setFormData({ ...formData, [name]: digitsOnly });
+            }
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -28,7 +39,7 @@ const Register = () => {
         setLoading(true);
 
         try {
-            const { name, email, password } = formData;
+            const { name, email, password, phone } = formData;
 
             // Basic validation
             if (password.length < 6) {
@@ -37,11 +48,19 @@ const Register = () => {
                 return;
             }
 
+            // Phone validation
+            if (!phone || phone.length !== 10) {
+                setError('Phone number must be exactly 10 digits');
+                setLoading(false);
+                return;
+            }
+
             // Call backend API
             const response = await api.post('/auth/register', {
                 name,
                 email,
-                password
+                password,
+                phone
             });
 
             // Login with the returned token
@@ -115,6 +134,26 @@ const Register = () => {
                                     onChange={handleChange}
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2 ml-1">Phone Number</label>
+                            <div className="relative group/input">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors">
+                                    <Phone size={18} />
+                                </span>
+                                <input
+                                    name="phone"
+                                    type="tel"
+                                    required
+                                    className="block w-full bg-slate-950 border border-slate-800 text-white rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-600"
+                                    placeholder="1234567890"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    maxLength={10}
+                                />
+                            </div>
+                            <p className="mt-2 text-xs text-slate-500 ml-1">Enter 10 digit phone number</p>
                         </div>
 
                         <div>

@@ -6,7 +6,7 @@ import ProductGrid from '../components/ProductGrid';
 import FilterSidebar from '../components/FilterSidebar';
 import EmptyState from '../components/EmptyState';
 import { ProductSkeletonGrid } from '../components/ProductSkeleton';
-import { supabase } from '../lib/supabaseClient';
+import api from '../services/api';
 import { categories, brands } from '../data/products';
 
 interface Product {
@@ -37,20 +37,16 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const itemsPerPage = 8;
 
-  // Fetch products from Supabase
+  // Fetch products from backend API
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name', { ascending: true });
-
-      if (error) {
+      try {
+        const res = await api.get('/products?limit=1000');
+        setProducts(res.data.data || []);
+      } catch (error) {
         console.error('Error fetching products:', error);
         setProducts([]);
-      } else {
-        setProducts(data || []);
       }
       setLoading(false);
     };

@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
@@ -10,7 +10,7 @@ const pool = new Pool({
 const connectDB = async () => {
     // Try to connect to PostgreSQL, but don't fail if it doesn't work
     // The app will use Supabase instead
-    if (!process.env.POSTGRES_URL) {
+    if (!process.env.DATABASE_URL) {
         console.log('⚠️  PostgreSQL not configured, using Supabase instead');
         return;
     }

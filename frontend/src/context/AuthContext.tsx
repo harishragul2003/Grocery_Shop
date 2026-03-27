@@ -2,6 +2,16 @@ import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+// Helper to check if JWT token is expired
+const isTokenExpired = (token: string): boolean => {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+    } catch {
+        return true;
+    }
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,7 +23,14 @@ export const AuthProvider = ({ children }) => {
                 const token = localStorage.getItem('token');
                 
                 if (savedUser && token) {
-                    setUser(JSON.parse(savedUser));
+                    // Clear expired tokens automatically
+                    if (isTokenExpired(token)) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        setUser(null);
+                    } else {
+                        setUser(JSON.parse(savedUser));
+                    }
                 }
             } catch (err) {
                 console.error('Error loading user from localStorage:', err);
@@ -39,7 +56,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        // Also clear cart when user logs out
         const cartKeys = Object.keys(localStorage).filter(key => key.startsWith('cart_'));
         cartKeys.forEach(key => localStorage.removeItem(key));
     };

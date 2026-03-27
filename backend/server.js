@@ -33,16 +33,33 @@ const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 mins
     max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api', limiter);
+// app.use('/api', limiter);
+if (process.env.NODE_ENV === "production") {
+    app.use('/api', limiter);
+}
+
 
 // Prevent http param pollution
 app.use(hpp());
 
 // Enable CORS
 app.use(cors({
-    origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://10.159.28.124:5173'],
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            "http://localhost:5173",
+            "http://10.159.28.124:5173",
+            "http://192.168.137.1:5174"
+        ];
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }));
+
 
 // Set static folder
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

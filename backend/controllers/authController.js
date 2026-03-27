@@ -5,13 +5,31 @@ const User = require('../models/User');
 // @access  Public
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, phone } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !password || !phone) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Please provide name, email, password, and phone number' 
+            });
+        }
+
+        // Validate phone number (must be exactly 10 digits)
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Phone number must be exactly 10 digits' 
+            });
+        }
 
         // Create user
         const user = await User.create({
             name,
             email,
-            password
+            password,
+            phone
         });
 
         sendTokenResponse(user, 201, res);
