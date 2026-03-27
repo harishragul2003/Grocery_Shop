@@ -49,6 +49,7 @@ app.use(cors({
             "http://localhost:5173",
             "http://10.159.28.124:5173",
             "http://192.168.137.1:5174",
+            "https://grocery-shop-zeta.vercel.app",
             process.env.CLIENT_URL,
             process.env.FRONTEND_URL
         ].filter(Boolean);
