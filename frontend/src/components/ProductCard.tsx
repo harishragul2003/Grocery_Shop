@@ -5,6 +5,8 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import LazyImage from './LazyImage';
 
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=75&w=400&fm=webp';
+
 const ProductCard = ({ product, index = 0 }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
@@ -103,9 +105,11 @@ const ProductCard = ({ product, index = 0 }) => {
         <div className="relative aspect-square overflow-hidden">
           <LazyImage
             ref={imageRef}
-            src={product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'}
+            src={product.image_url || product.image || FALLBACK_IMG}
             alt={product.name}
             className="w-full h-full hover:scale-105 transition-transform duration-400"
+            eager={index < 4}
+            width={400}
           />
 
         {/* Category Badge */}
@@ -277,7 +281,7 @@ const ProductCard = ({ product, index = 0 }) => {
           }}
         >
           <img
-            src={product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400'}
+            src={product.image_url || product.image || FALLBACK_IMG}
             alt={product.name}
             className="w-full h-full object-cover"
           />
